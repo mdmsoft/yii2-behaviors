@@ -42,6 +42,7 @@ class ExtendedBehavior extends \yii\base\Behavior
     public function events()
     {
         return[
+            BaseActiveRecord::EVENT_BEFORE_INSERT => 'beforeInsert',
             BaseActiveRecord::EVENT_AFTER_FIND => 'loadRelation',
             BaseActiveRecord::EVENT_AFTER_INSERT => 'afterSave',
             BaseActiveRecord::EVENT_AFTER_UPDATE => 'afterSave',
@@ -74,8 +75,8 @@ class ExtendedBehavior extends \yii\base\Behavior
      */
     public function canGetProperty($name, $checkVars = true)
     {
-        return $this->_relation->hasAttribute($name) || 
-            $this->_relation->canGetProperty($name, $checkVars) || 
+        return $this->_relation->hasAttribute($name) ||
+            $this->_relation->canGetProperty($name, $checkVars) ||
             parent::canGetProperty($name, $checkVars);
     }
 
@@ -84,8 +85,8 @@ class ExtendedBehavior extends \yii\base\Behavior
      */
     public function canSetProperty($name, $checkVars = true)
     {
-        return $this->_relation->hasAttribute($name) || 
-            $this->_relation->canSetProperty($name, $checkVars) || 
+        return $this->_relation->hasAttribute($name) ||
+            $this->_relation->canSetProperty($name, $checkVars) ||
             parent::canSetProperty($name, $checkVars);
     }
 
@@ -160,5 +161,27 @@ class ExtendedBehavior extends \yii\base\Behavior
     public function afterDelete($event)
     {
         $this->_relation->delete();
+    }
+
+    /**
+     * Related object getter
+     * @return \yii\db\BaseActiveRecord
+     */
+    public function getRelation()
+    {
+        return $this->_relation;
+    }
+
+    /**
+     * Execute before model inserted
+     * @return \yii\db\BaseActiveRecord
+     */
+    public function beforeInsert($event)
+    {
+        if ($this->_relation->save()) {
+            foreach ($this->relationKey as $from => $to) {
+                $this->owner[$from] = $this->_relation->$to;
+            }
+        }
     }
 }
