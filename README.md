@@ -100,9 +100,9 @@ After that, we can access `CustomerDetail` property from `Customer` as their own
 ```php
 $model = new Customer();
 
-$model-name = 'Doflamingo';
+$model->name = 'Doflamingo';
 $model->organisation = 'Donquixote Family';
-$model->address = 'North Blue';
+$model->address1 = 'North Blue';
 
 $model->save(); // it will save this model and related model
 ```
